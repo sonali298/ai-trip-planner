@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import Header from "./_components/Header"; // 1. Import the Header
+import Header from "./_components/Header";
+import { ConvexClientProvider } from "./ConvexClientProvider";
+import Provider from "./provider"; // Import your custom provider
 
-export const metadata: Metadata = {
+const outfit = Outfit({ subsets: ["latin"] });
+
+export const metadata = {
   title: "AI Trip Planner",
   description: "Your personal AI trip planner",
 };
@@ -15,12 +20,17 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body>
-          <Header /> {/* 2. Place the Header here, above the page content */}
-          <main>{children}</main>
-        </body>
-      </html>
+      <ConvexClientProvider>
+        <html lang="en">
+          <body className={outfit.className}>
+            {/* Your custom provider now wraps the UI */}
+            <Provider>
+              <Header />
+              {children}
+            </Provider>
+          </body>
+        </html>
+      </ConvexClientProvider>
     </ClerkProvider>
   );
 }

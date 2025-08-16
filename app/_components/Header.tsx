@@ -1,7 +1,9 @@
+"use client"
 import Image from 'next/image';
 import Link from 'next/link'; // 1. IMPORT the correct Link component
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { SignIn, SignInButton, useUser } from '@clerk/nextjs';
 
 const menuOptions = [
   {
@@ -19,6 +21,9 @@ const menuOptions = [
 ];
 
 const Header = () => {
+
+
+  const {user} =useUser();
   return (
     <div className='flex items-center justify-between p-4 shadow-sm'>
       {/* logo */}
@@ -41,7 +46,12 @@ const Header = () => {
 
       {/* get started button */}
       <div>
+        {!user?<SignInButton  mode='modal'>
         <Button>Get Started</Button>
+        </SignInButton>:
+        <Link  href={'/create-trip'}>
+        <Button> Create New Trip</Button>
+        </Link>}
       </div>
     </div>
   );
