@@ -1,10 +1,12 @@
+// File: app/layout.tsx
+
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Header from "./_components/Header";
 import { ConvexClientProvider } from "./ConvexClientProvider";
-import Provider from "./provider"; // Import your custom provider
+import Provider from "./provider";
 
 const outfit = Outfit({ subsets: ["latin"] });
 
@@ -19,18 +21,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <ConvexClientProvider>
-        <html lang="en">
-          <body className={outfit.className}>
-            {/* Your custom provider now wraps the UI */}
+    <html lang="en">
+      <body className={outfit.className}>
+        <ClerkProvider>
+          <ConvexClientProvider>
             <Provider>
               <Header />
               {children}
             </Provider>
-          </body>
-        </html>
-      </ConvexClientProvider>
-    </ClerkProvider>
+          </ConvexClientProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }
