@@ -37,6 +37,7 @@ function Hero() {
       return;
     }
     //Navigate to Trip planner web screen
+    router.push('create-new-trip')
   }
   return (
     <div className='mt-24 flex w-full justify-center'>
