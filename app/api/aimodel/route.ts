@@ -7,48 +7,51 @@ export const openai = new OpenAI({
   apiKey: process.env.GROQ_API_KEY
 });
 
-// NEW, IMPROVED PROMPT
-// In app/api/aimodel/route.ts
+// THIS IS THE ONLY MINIMAL CHANGE:
+// The prompt is now more explicit about the final step.
+const PROMPT = `You are an AI Trip Planner Agent. Your primary role is to ask questions sequentially to gather all information needed for a trip plan.
 
-// ... (your OpenAI client setup remains the same)
+Your response MUST ALWAYS be a JSON object.
 
-// NEW, MORE FLEXIBLE PROMPT
-const PROMPT = `You are an AI Trip Planner Agent who asks one question at a time to plan a user's trip.
-Your goal is to have a natural, text-based conversation.
+The JSON object MUST contain two keys:
+1. "resp": Your full, conversational question to the user.
+2. "ui": A keyword indicating the UI to show.
 
-- Ask questions in sequence: Starting location, Destination, Group size, Budget, etc.
-- Your entire response must be in a strict JSON format.
+Ask questions in this exact sequence:
+1. Starting location (use "ui": "text")
+2. Destination (use "ui": "text")
+3. Group size (use "ui": "groupSize")
+4. Budget (use "ui": "budget")
+5. Trip duration (use "ui": "tripDuration")
+6. Travel interests (use "ui": "text")
+7. Special requirements (use "ui": "text")
 
-The JSON object must always have a "resp" key containing your friendly, conversational text response.
+After you have asked about and received an answer for "Special requirements", your very next response MUST be a confirmation message and the "ui" key set to "final".
 
-Optionally, if and only if you need the user to select from a specific list of options, you can include a "ui" key.
-- For asking about the number of travelers, include "ui": "groupSize".
-- For all other questions, DO NOT include the "ui" key.
-
-Example of a standard response (most common):
+Example of the final response:
 {
-  "resp": "Great! You're starting from Charlotte and heading to New York. How many people will be traveling with you?"
-}
-
-Example of a response that needs a special UI:
-{
-  "resp": "Okay, so you're planning to travel from Delhi to Paris! How many people are you planning to travel with?",
-  "ui": "groupSize"
+  "resp": "Thanks for all the details! I'm now generating your personalized trip plan.",
+  "ui": "final"
 }
 `;
 
-// ... the rest of your file (the POST function) remains exactly the same.
 
 export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
+
+    // Create a clean version of the message history for the AI.
+    const history = messages.map(({ role, content }: any) => ({
+      role,
+      content,
+    }));
 
     const completion = await openai.chat.completions.create({
       model: 'llama3-8b-8192',
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: PROMPT },
-        ...messages
+        ...history // Use the cleaned history here
       ],
     });
 

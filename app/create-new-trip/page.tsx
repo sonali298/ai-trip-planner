@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Globe2, Plane, Landmark, Send } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import ChatBox from './_components/ChatBox';
 import axios from 'axios';
 
@@ -13,10 +14,10 @@ export type Message = {
 };
 
 const suggestions = [
-  { title: 'Create new trip', icon: <Globe2 className='h-8 w-8 text-blue-400' /> },
-  { title: 'Inspire me where to go', icon: <Plane className='h-8 w-8 text-green-500' /> },
-  { title: 'Discover hidden gems', icon: <Landmark className='h-8 w-8 text-orange-500' /> },
-  { title: 'Adventure destination', icon: <Globe2 className='h-8 w-8 text-yellow-600' /> }
+    { title: 'Create new trip', icon: <Globe2 className='h-8 w-8 text-blue-400' /> },
+    { title: 'Inspire me where to go', icon: <Plane className='h-8 w-8 text-green-500' /> },
+    { title: 'Discover hidden gems', icon: <Landmark className='h-8 w-8 text-orange-500' /> },
+    { title: 'Adventure destination', icon: <Globe2 className='h-8 w-8 text-yellow-600' /> }
 ];
 
 function CreateNewTrip() {
@@ -24,20 +25,18 @@ function CreateNewTrip() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [userInput, setUserInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  // MODIFIED: This function now correctly handles a string input
   const sendMessage = async (messageContent: string) => {
     if (!messageContent.trim()) return;
 
     setLoading(true);
     const newUserMessage: Message = { role: 'user', content: messageContent };
     
-    // Create the new message history
     const updatedMessages = [...messages, newUserMessage];
     setMessages(updatedMessages);
 
     try {
-      // Send the up-to-date message history to the API
       const result = await axios.post('/api/aimodel', { messages: updatedMessages });
       const aiMessage: Message = {
         role: 'assistant',
@@ -54,9 +53,8 @@ function CreateNewTrip() {
     }
   };
   
-  // This function starts the chat with the initial welcome message
   const startNewChat = () => {
-    if (messages.length === 0) { // Only add if chat is empty
+    if (messages.length === 0) {
         const initialMessage: Message = {
         role: 'assistant',
         content: 'Hi! To help plan your trip, could you please tell me your starting location?',
@@ -66,7 +64,6 @@ function CreateNewTrip() {
     setShowChatBox(true);
   };
   
-  // This function starts a chat from the landing page input
   const startChatFromInput = () => {
       if(!userInput.trim()) return;
       setShowChatBox(true);
@@ -84,7 +81,6 @@ function CreateNewTrip() {
         <br />
         handles the hard work, so you can focus on the journey.
       </p>
-
       <div className='mt-8 space-y-4'>
         {suggestions.map((item, index) => (
           <div
@@ -97,7 +93,6 @@ function CreateNewTrip() {
           </div>
         ))}
       </div>
-
       <div className='mt-12'>
         <div className='relative'>
           <Textarea
@@ -126,14 +121,12 @@ function CreateNewTrip() {
           ? <ChatBox 
               messages={messages}
               loading={loading}
-              sendMessage={sendMessage} // This now correctly matches what ChatBox expects
+              sendMessage={sendMessage}
+              router={router}
             /> 
           : landingPageContent}
       </div>
-      
-      <div>
-        Map and trip Plan to Display
-      </div>
+      <div>Map and trip Plan to Display</div>
     </div>
   );
 }
