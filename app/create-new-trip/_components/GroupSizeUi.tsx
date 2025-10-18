@@ -1,15 +1,13 @@
 'use client'
 import React from 'react';
 
-// The data list for traveler options
 export const SelectTravelersList = [
-  { id: 1, title: 'Just Me', desc: 'A sole traveler in exploration', icon: '✈️', people: '1' },
-  { id: 2, title: 'A Couple', desc: 'Two travelers in tandem', icon: '🥂', people: '2 People' },
-  { id: 3, title: 'Family', desc: 'A group of fun loving adventurers', icon: '🏡', people: '3 to 5 People' },
-  { id: 4, title: 'Friends', desc: 'A bunch of thrill-seekers', icon: '🏕️', people: '5 to 10 People' },
+  { id: 1, title: 'Just Me', desc: 'A sole traveler', icon: '✈️' },
+  { id: 2, title: 'A Couple', desc: 'Two travelers', icon: '🥂' },
+  { id: 3, title: 'Family', desc: 'A group of adventurers', icon: '🏡' },
+  { id: 4, title: 'Friends', desc: 'A bunch of thrill-seekers', icon: '🏕️' },
 ];
 
-// Define the component's props
 interface GroupSizeUiProps {
   onSelect: (selectedValue: string) => void;
 }
@@ -18,16 +16,16 @@ function GroupSizeUi({ onSelect }: GroupSizeUiProps) {
   return (
     <div className='mt-5'>
       <h2 className='font-bold text-lg'>Who's traveling?</h2>
-      <div className='grid grid-cols-2 md:grid-cols-3 gap-3 mt-3'>
-        {SelectTravelersList.map((item, index) => (
-          // Add an onClick handler to each item
+      <div className='grid grid-cols-2 md:grid-cols-4 gap-3 mt-3'>
+        {SelectTravelersList.map((item) => (
           <div 
-            key={index} 
+            key={item.id} 
             onClick={() => onSelect(item.title)}
-            className='p-3 border rounded-lg bg-white hover:border-primary cursor-pointer text-center'
+            className='p-4 border rounded-lg hover:shadow-lg cursor-pointer flex flex-col items-center gap-2'
           >
-            <h2 className='text-3xl'>{item.icon}</h2>
-            <h2 className='font-semibold text-sm mt-1'>{item.title}</h2>
+            <p className='text-4xl'>{item.icon}</p>
+            <h3 className='font-semibold text-sm'>{item.title}</h3>
+            <p className='text-xs text-gray-500'>{item.desc}</p>
           </div>
         ))}
       </div>

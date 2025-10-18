@@ -1,72 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
+// ### CHANGE: Google ki jagah OpenAI ka package import kiya (OpenRouter ke liye)
 import OpenAI from 'openai';
 
-// This is the correct configuration for the Groq API client
-export const openai = new OpenAI({
-  baseURL: 'https://api.groq.com/openai/v1',
-  apiKey: process.env.GROQ_API_KEY
+// ### CHANGE: Naya OpenAI client initialize kiya OpenRouter ke liye
+const openai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1", // OpenRouter ka endpoint
+  apiKey: process.env.OPENROUTER_API_KEY, // OpenRouter ki key
 });
 
-// THIS IS THE ONLY MINIMAL CHANGE:
-// The prompt is now more explicit about the final step.
-const PROMPT = `You are an AI Trip Planner Agent. Your primary role is to ask questions sequentially to gather all information needed for a trip plan.
+const PROMPT = `You are an AI Trip Planner Agent. Your only function is to ask questions to plan a trip.
+Your response MUST be a valid JSON object and NOTHING ELSE.
+The JSON object MUST have two keys: "resp" (your question) and "ui" (a keyword).
+After ALL information is gathered, your response must use "ui": "final".`;
 
-Your response MUST ALWAYS be a JSON object.
-
-The JSON object MUST contain two keys:
-1. "resp": Your full, conversational question to the user.
-2. "ui": A keyword indicating the UI to show.
-
-Ask questions in this exact sequence:
-1. Starting location (use "ui": "text")
-2. Destination (use "ui": "text")
-3. Group size (use "ui": "groupSize")
-4. Budget (use "ui": "budget")
-5. Trip duration (use "ui": "tripDuration")
-6. Travel interests (use "ui": "text")
-7. Special requirements (use "ui": "text")
-
-After you have asked about and received an answer for "Special requirements", your very next response MUST be a confirmation message and the "ui" key set to "final".
-
-Example of the final response:
-{
-  "resp": "Thanks for all the details! I'm now generating your personalized trip plan.",
-  "ui": "final"
-}
-`;
-
+const FINAL_PROMPT = `Generate a complete Travel Plan...
+JSON Output Schema: { ... "hotels": [{"hotel_name": "...", "hotel_image_url": "string (MUST be a REAL, working, public image URL, NO placeholders like example.com)", ...}], ... }`;
 
 export async function POST(req: NextRequest) {
+  console.log("API route hit. Processing request with OpenRouter...");
   try {
     const { messages } = await req.json();
 
-    // Create a clean version of the message history for the AI.
-    const history = messages.map(({ role, content }: any) => ({
-      role,
-      content,
-    }));
+    const lastUserMessage = messages[messages.length - 1]?.content || '';
+    const isFinal = lastUserMessage.includes("generate the final trip plan");
+
+    // ### CHANGE: History format wapas OpenAI jaisa kiya
+    const history = messages.map(({ role, content }: any) => ({ role, content }));
 
     const completion = await openai.chat.completions.create({
-      model: 'llama3-8b-8192',
-      response_format: { type: 'json_object' },
+      // ### CHANGE: OpenRouter ka free model use kiya
+      model: "mistralai/mistral-7b-instruct:free", 
+      response_format: { type: 'json_object' }, 
       messages: [
-        { role: 'system', content: PROMPT },
-        ...history // Use the cleaned history here
+        { role: 'system', content: isFinal ? FINAL_PROMPT : PROMPT },
+        ...history
       ],
     });
 
-    const messageContent = completion.choices[0].message.content;
+    let messageContent = completion.choices[0].message.content;
+    if (!messageContent) { throw new Error("Empty response from AI"); }
 
-    if (!messageContent) {
-      throw new Error("Empty response from AI");
+    let responseObject = JSON.parse(messageContent);
+    
+    // Fallback logic agar AI galti kare (optional but good)
+    if (responseObject.resp && typeof responseObject.resp === 'string') {
+        try {
+            const nestedPlan = JSON.parse(responseObject.resp);
+            if (nestedPlan.trip_plan) {
+                console.log("AI might have nested the plan, extracting.");
+                responseObject = nestedPlan;
+            }
+        } catch (e) { /* Ignore */ }
     }
     
-    const responseObject = JSON.parse(messageContent);
-    
+    console.log("Successfully processed request via OpenRouter.");
     return NextResponse.json(responseObject);
 
-  } catch (e) {
-    console.error("API Error:", e);
+  } catch (e: any) {
+    console.error("API Error in POST function:", e.message);
+    // OpenRouter se specific error details mil sakti hain
+    if (e.response && e.response.data) {
+        console.error("OpenRouter Error Details:", e.response.data);
+    }
     return NextResponse.json({ error: "An internal server error occurred." }, { status: 500 });
   }
 }

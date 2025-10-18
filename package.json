@@ -12,6 +12,7 @@
     "@arcjet/inspect": "^1.0.0-beta.10",
     "@arcjet/next": "^1.0.0-beta.10",
     "@clerk/nextjs": "^6.31.1",
+    "@google/generative-ai": "^0.24.1",
     "@radix-ui/react-slot": "^1.2.3",
     "@tabler/icons-react": "^3.34.1",
     "axios": "^1.11.0",
@@ -21,7 +22,7 @@
     "lucide-react": "^0.539.0",
     "motion": "^12.23.12",
     "next": "^15.4.6",
-    "openai": "^5.16.0",
+    "openai": "^5.23.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwind-merge": "^3.3.1"

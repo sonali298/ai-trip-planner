@@ -20,14 +20,14 @@ function TripDurationUi({ onConfirm }: TripDurationUiProps) {
   };
 
   return (
-    <div className='mt-5 p-4 border rounded-lg bg-white shadow'>
-      <h2 className='font-bold text-lg'>How many days do you want to travel?</h2>
-      <div className='flex items-center justify-center gap-4 mt-4'>
+    <div className='mt-5 p-4 border rounded-lg bg-white shadow-lg'>
+      <h2 className='font-bold text-lg text-center'>How many days do you want to travel?</h2>
+      <div className='flex items-center justify-center gap-4 my-4'>
         <Button variant="outline" size="icon" onClick={handleDecrement}>-</Button>
-        <span className='text-xl font-semibold'>{days} Days</span>
+        <span className='text-xl font-bold'>{days} Days</span>
         <Button variant="outline" size="icon" onClick={handleIncrement}>+</Button>
       </div>
-      <Button className='w-full mt-4' onClick={() => onConfirm(days)}>
+      <Button className='w-full bg-orange-500 hover:bg-orange-600' onClick={() => onConfirm(days)}>
         Confirm
       </Button>
     </div>
