@@ -5,7 +5,7 @@ import React from "react";
 // import { Carousel } from "@/components/ui/apple-cards-carousel"; 
 
 // This component renders the visual appearance of each card
-const CityCard = ({ card }) => {
+const CityCard = ({ card }: { card: any }) => {
   return (
     <div
       className="relative h-96 w-full rounded-2xl bg-cover bg-center transition-transform duration-300 hover:scale-105"
