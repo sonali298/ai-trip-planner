@@ -83,7 +83,11 @@ export const Carousel = ({ items, initialScroll = 0 }: CarouselProps) => {
   };
 
   const isMobile = () => {
-    return window && window.innerWidth < 768;
+    // We need to check for window existence for server-side rendering
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 768;
+    }
+    return false; // Default value for server
   };
 
   return (
